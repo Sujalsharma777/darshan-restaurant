@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { requireCustomerAuth } from "../../middleware/auth.js";
+import { optionalCustomerAuth, requireCustomerAuth } from "../../middleware/auth.js";
 import { getRestaurantDetail, listRestaurantCategories, listRestaurants } from "../../services/restaurantService.js";
 import { getMenu } from "../../services/menuService.js";
 import { getArrivalWindow } from "../../services/arrivalService.js";
@@ -26,9 +26,10 @@ const listQuerySchema = z.object({
 // OpenAPI docs: src/docs/user/restaurants.docs.ts
 router.get(
   "/",
+  optionalCustomerAuth,
   asyncHandler(async (req, res) => {
     const query = validateQuery(listQuerySchema, req.query);
-    const result = await listRestaurants({ ...query, lang: req.lang });
+    const result = await listRestaurants({ ...query, lang: req.lang, customerId: req.customer?.id });
     sendSuccess(res, { restaurants: result.restaurants, pagination: result.pagination });
   }),
 );
@@ -45,11 +46,12 @@ const detailQuerySchema = z.object({ latitude: coordinate, longitude: coordinate
 
 router.get(
   "/:id",
+  optionalCustomerAuth,
   asyncHandler(async (req, res) => {
     const id = idParam(req);
     const query = validateQuery(detailQuerySchema, req.query);
     const userLocation = query.latitude !== undefined && query.longitude !== undefined ? { latitude: query.latitude, longitude: query.longitude } : undefined;
-    const restaurant = await getRestaurantDetail(id, userLocation, req.lang);
+    const restaurant = await getRestaurantDetail(id, userLocation, req.lang, req.customer?.id);
     sendSuccess(res, restaurant);
   }),
 );

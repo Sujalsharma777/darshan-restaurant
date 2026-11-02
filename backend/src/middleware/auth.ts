@@ -104,6 +104,19 @@ export const requireCustomerAuth = async (req: Request, _res: Response, next: Ne
   }
 };
 
+/** Adds customer identity for personalized public reads while leaving anonymous reads public. */
+export const optionalCustomerAuth = (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const header = req.headers.authorization;
+    const token = header?.startsWith("Bearer ") ? header.slice(7) : undefined;
+    if (token) {
+      const decoded = jwt.verify(token, env.customerJwtSecret) as CustomerJwtPayload;
+      if (decoded.type === "customer") req.customer = { id: decoded.sub, phone: "", language: DEFAULT_LANGUAGE };
+    }
+  } catch { /* Invalid/expired tokens behave like anonymous requests on public reads. */ }
+  next();
+};
+
 // --- Shared ---------------------------------------------------------------
 
 const timingSafeEqual = (a: string, b: string) => {

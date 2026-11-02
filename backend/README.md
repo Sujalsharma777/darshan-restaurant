@@ -94,6 +94,9 @@ POST   /api/payments/verify/             [customer auth] verifies Razorpay HMAC 
 
 GET    /api/my-restaurant-bookings/      [customer auth] ?filter=active|past
 GET    /api/restaurant-bookings/:id/     [customer auth, ownership enforced]
+GET/POST/DELETE /api/restaurant-wishlist[/:restaurantId] [customer auth]
+POST   /api/restaurant-reviews          [customer auth, completed booking]
+GET    /api/restaurants/:id/reviews      [customer auth] ?page&limit
 PATCH  /api/restaurant-bookings/:id/     [customer auth] date/time/people only
 POST   /api/restaurant-bookings/:id/cancel/  [customer auth]
 

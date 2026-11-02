@@ -40,6 +40,7 @@ const options: swaggerJsdoc.Options = {
       { name: "User: Arrival", description: "Same-day arrival-time window for ordering" },
       { name: "User: Tables", description: "Physical table availability for a specific date/time/party size" },
       { name: "User: Bookings", description: "The signed-in customer's own bookings and pre-orders" },
+      { name: "User: Engagement", description: "Customer wishlist and restaurant reviews" },
       { name: "User: Payments", description: "Razorpay payment order creation and verification" },
 
       { name: "Admin: Auth", description: "Admin/SuperAdmin login and account" },
@@ -169,7 +170,7 @@ const options: swaggerJsdoc.Options = {
   apis: ["./src/docs/**/*.ts", "./dist/src/docs/**/*.js"],
 };
 
-const USER_PATH_PREFIXES = ["/api/auth", "/api/restaurants", "/api/payments", "/api/my-restaurant-bookings", "/api/restaurant-bookings"];
+const USER_PATH_PREFIXES = ["/api/auth", "/api/restaurants", "/api/payments", "/api/my-restaurant-bookings", "/api/restaurant-bookings", "/api/restaurant-wishlist", "/api/restaurant-reviews"];
 
 /** Adds the shared `lang` parameter to every customer-app operation (see resolveLanguage middleware). */
 const withLangParameter = (spec: any) => {

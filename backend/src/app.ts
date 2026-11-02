@@ -24,6 +24,7 @@ import userRestaurantsRoutes from "./routes/user/restaurants.routes.js";
 import userPaymentsRoutes from "./routes/user/payments.routes.js";
 import userMyBookingsRoutes from "./routes/user/myBookings.routes.js";
 import userRestaurantBookingsRoutes from "./routes/user/restaurantBookings.routes.js";
+import userRestaurantEngagementRoutes from "./routes/user/restaurantEngagement.routes.js";
 
 // Admin / SuperAdmin (back office): everything gated behind requireAdminAuth.
 import adminAuthRoutes from "./routes/admin/auth.routes.js";
@@ -87,12 +88,13 @@ app.use("/api", requireClientKey);
 
 // User (customer app) — only endpoints the app's own users may call. These answer in the
 // language the app asks for (?lang= / Accept-Language), English by default.
-app.use(["/api/auth", "/api/restaurants", "/api/payments", "/api/my-restaurant-bookings", "/api/restaurant-bookings"], resolveLanguage);
+app.use(["/api/auth", "/api/restaurants", "/api/payments", "/api/my-restaurant-bookings", "/api/restaurant-bookings", "/api/restaurant-wishlist", "/api/restaurant-reviews"], resolveLanguage);
 app.use("/api/auth", userAuthRoutes);
 app.use("/api/restaurants", userRestaurantsRoutes);
 app.use("/api/payments", userPaymentsRoutes);
 app.use("/api/my-restaurant-bookings", userMyBookingsRoutes);
 app.use("/api/restaurant-bookings", userRestaurantBookingsRoutes);
+app.use("/api", userRestaurantEngagementRoutes);
 
 // Admin / SuperAdmin — everything gated behind requireAdminAuth.
 app.use("/api/admin/auth", adminAuthRoutes);

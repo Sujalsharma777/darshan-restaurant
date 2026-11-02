@@ -14,7 +14,7 @@ const restaurantInclude = {
 
 type RestaurantWithCategories = Prisma.RestaurantGetPayload<{ include: typeof restaurantInclude }>;
 
-const toPublicRestaurant = (restaurant: RestaurantWithCategories, lang: Language, userLocation?: { latitude: number; longitude: number }) => {
+const toPublicRestaurant = (restaurant: RestaurantWithCategories, lang: Language, userLocation?: { latitude: number; longitude: number }, isWishlisted = false) => {
   const t = translator(restaurant.translations, lang);
   return {
     id: restaurant.id,
@@ -26,6 +26,7 @@ const toPublicRestaurant = (restaurant: RestaurantWithCategories, lang: Language
     isPureVeg: restaurant.isPureVeg,
     rating: Number(restaurant.rating),
     ratingCount: restaurant.ratingCount,
+    isWishlisted,
     prepTimeMin: restaurant.prepTimeMin,
     prepTimeMax: restaurant.prepTimeMax,
     opensAt: to12Hour(restaurant.opensAt),
@@ -61,11 +62,14 @@ export type ListRestaurantsInput = {
   page: number;
   limit: number;
   lang?: Language;
+  customerId?: string;
+  restaurantIds?: string[];
 };
 
 export const listRestaurants = async (input: ListRestaurantsInput) => {
   const where: Prisma.RestaurantWhereInput = {
     status: "ACTIVE",
+    ...(input.restaurantIds ? { id: { in: input.restaurantIds } } : {}),
     ...(input.city ? { city: { equals: input.city } } : {}),
     ...(input.category ? { categories: { some: { category: { key: input.category } } } } : {}),
     ...(input.q
@@ -99,16 +103,18 @@ export const listRestaurants = async (input: ListRestaurantsInput) => {
   const userLocation =
     input.latitude !== undefined && input.longitude !== undefined ? { latitude: input.latitude, longitude: input.longitude } : undefined;
 
+  const wishlistedIds = input.customerId ? new Set((await prisma.restaurantWishlist.findMany({ where: { restaurantUserId: input.customerId, restaurantId: { in: restaurants.map((r) => r.id) } }, select: { restaurantId: true } })).map((row) => row.restaurantId)) : new Set<string>();
   return {
-    restaurants: restaurants.map((restaurant) => toPublicRestaurant(restaurant, input.lang ?? DEFAULT_LANGUAGE, userLocation)),
+    restaurants: restaurants.map((restaurant) => toPublicRestaurant(restaurant, input.lang ?? DEFAULT_LANGUAGE, userLocation, wishlistedIds.has(restaurant.id))),
     pagination: pagination(input.page, input.limit, total),
   };
 };
 
-export const getRestaurantDetail = async (id: string, userLocation?: { latitude: number; longitude: number }, lang: Language = DEFAULT_LANGUAGE) => {
+export const getRestaurantDetail = async (id: string, userLocation?: { latitude: number; longitude: number }, lang: Language = DEFAULT_LANGUAGE, customerId?: string) => {
   const restaurant = await prisma.restaurant.findUnique({ where: { id }, include: restaurantInclude });
   if (!restaurant || restaurant.status !== "ACTIVE") throw new ApiError(404, "Restaurant not found");
-  return toPublicRestaurant(restaurant, lang, userLocation);
+  const wishlistEntry = customerId ? await prisma.restaurantWishlist.findUnique({ where: { restaurantUserId_restaurantId: { restaurantUserId: customerId, restaurantId: id } } }) : null;
+  return toPublicRestaurant(restaurant, lang, userLocation, !!wishlistEntry);
 };
 
 /** Internal helper for services that need the raw record (booking, admin, arrival window). */

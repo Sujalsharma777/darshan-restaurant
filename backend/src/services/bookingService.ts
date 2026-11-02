@@ -39,7 +39,7 @@ export type { BookingClientStatus } from "../constants/bookingStatus.js";
  * Restaurant name, cuisine and item names come from the translations snapshotted when the order
  * was placed (English when missing); status/cancellation labels are fixed copy in `lang`.
  */
-export const toBookingResponse = (booking: RestaurantBooking & { table?: any; preorder?: any }, lang: Language = DEFAULT_LANGUAGE) => {
+export const toBookingResponse = (booking: RestaurantBooking & { table?: any; preorder?: any; review?: { id: string } | null }, lang: Language = DEFAULT_LANGUAGE) => {
   const t = translator(booking.translationsSnapshot, lang);
   return {
     id: booking.id,
@@ -60,6 +60,7 @@ export const toBookingResponse = (booking: RestaurantBooking & { table?: any; pr
     mobileNumber: booking.mobileNumber,
     email: booking.email ?? "",
     status: toClientStatus(booking.status),
+    isReviewed: !!booking.review,
     /** Display text for `status` in the requested language. */
     statusLabel: statusLabel(booking.status, lang),
     /** What the customer may still do — lets the app show/hide buttons without duplicating the rules. */
@@ -110,7 +111,7 @@ export type CreateBookingInput = {
   preorderItems: Array<{ menuItemId: string; quantity: number; note?: string }>;
 };
 
-const bookingInclude = { table: true, preorder: { include: { items: true } } } as const;
+const bookingInclude = { table: true, preorder: { include: { items: true } }, review: { select: { id: true } } } as const;
 
 const preparePreorder = async (client: any, restaurantId: string, items: CreateBookingInput["preorderItems"] = []) => {
   if (!items?.length) return null;

@@ -90,6 +90,8 @@ model RestaurantUser {
   payments        Payment[]
   refreshSessions RefreshSession[]
   notifications   Notification[]
+  wishlist        RestaurantWishlist[]
+  reviews         RestaurantReview[]
 
   @@map("restaurant_users")
 }
@@ -207,6 +209,8 @@ model Restaurant {
   tables         DiningTable[]
   bookings       RestaurantBooking[]
   admins         AdminRestaurant[]
+  wishlistedBy   RestaurantWishlist[]
+  reviews        RestaurantReview[]
 
   @@index([city, status])
   @@map("restaurants")
@@ -316,6 +320,7 @@ model RestaurantBooking {
   table          DiningTable?     @relation(fields: [tableId], references: [id], onDelete: SetNull)
   preorder       BookingPreorder?
   notifications  Notification[]
+  review         RestaurantReview?
 
   @@index([restaurantId, date, time])
   @@index([tableId, date, time])
@@ -323,6 +328,37 @@ model RestaurantBooking {
   @@index([status, date])
   @@index([restaurantId, createdAt])
   @@map("restaurant_bookings")
+}
+
+model RestaurantWishlist {
+  id               String   @id @default(uuid())
+  restaurantUserId String   @map("restaurant_user_id")
+  restaurantId     String   @map("restaurant_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  restaurantUser RestaurantUser @relation(fields: [restaurantUserId], references: [id], onDelete: Cascade)
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantUserId, restaurantId])
+  @@index([restaurantId])
+  @@map("restaurant_wishlists")
+}
+
+model RestaurantReview {
+  id               String   @id @default(uuid())
+  restaurantUserId String   @map("restaurant_user_id")
+  restaurantId     String   @map("restaurant_id")
+  bookingId        String   @unique @map("booking_id")
+  rating           Int
+  comment          String   @default("") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  restaurantUser RestaurantUser    @relation(fields: [restaurantUserId], references: [id], onDelete: Cascade)
+  restaurant     Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  booking        RestaurantBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, createdAt])
+  @@map("restaurant_reviews")
 }
 
 model BookingPreorder {
