@@ -37,6 +37,7 @@ export const env = {
   centralAuthJwksUrl: process.env.CENTRAL_AUTH_JWKS_URL ?? "https://darshanadmin.bharatotel.com/api/darshan/auth/jwks.json",
   centralAuthIssuer: process.env.CENTRAL_AUTH_ISSUER ?? "https://darshanadmin.bharatotel.com",
   centralAuthAudience: process.env.CENTRAL_AUTH_AUDIENCE ?? "bharatotel-modules",
+  customerDataRetentionYears: Number(process.env.CUSTOMER_DATA_RETENTION_YEARS ?? 8),
 
   razorpayKeyId: process.env.RAZORPAY_KEY_ID,
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET,

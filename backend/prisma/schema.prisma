@@ -83,6 +83,11 @@ model RestaurantUser {
   centralUserId Int?     @unique @map("central_user_id")
   /// Language the customer last used in the app; push notifications are sent in it.
   language      String   @default("en") @db.VarChar(8)
+  // Darshan account deletion (src/services/customerDeletionService.ts): locked on day 30
+  // so the phone number can no longer sign in to this row, then anonymised in place.
+  deletionLockedAt  DateTime? @map("deletion_locked_at")
+  anonymisedAt      DateTime? @map("anonymised_at")
+  deletedSubjectRef String?   @unique @map("deleted_subject_ref")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

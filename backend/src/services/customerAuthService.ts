@@ -41,6 +41,19 @@ export const authenticateCentralUser = async (input: {
 }) => {
   const existing = await prisma.restaurantUser.findUnique({ where: { phone: input.phone } });
 
+  // A customer whose Darshan account was deleted is never handed out again by phone
+  // number: whoever holds that number now may not be the same person. Anonymised rows no
+  // longer carry the number; this covers the window between the day-30 lock and
+  // anonymisation (an upcoming booking, say).
+  if (existing && (existing.deletionLockedAt || existing.anonymisedAt)) {
+    throw new ApiError(409, "This restaurant account was closed. Please contact support.");
+  }
+  // Same rule for a row that already belongs to a different central user: the phone
+  // number alone never moves an account from one person to another.
+  if (existing && existing.centralUserId !== null && existing.centralUserId !== input.centralUserId) {
+    throw new ApiError(409, "This phone number is linked to another account. Please contact support.");
+  }
+
   const user = existing
     ? await prisma.restaurantUser.update({
         where: { id: existing.id },

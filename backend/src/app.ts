@@ -17,6 +17,7 @@ import { logger } from "./modules/logger.js";
 import { swaggerSpec } from "./config/swagger.js";
 
 import restaurantCentralAuthRoutes from "./routes/restaurantCentralAuth.routes.js";
+import customerDeletionRoutes from "./routes/customerDeletion.routes.js";
 
 // User-facing (customer app): only endpoints the app's own users may call.
 import userAuthRoutes from "./routes/user/auth.routes.js";
@@ -83,6 +84,7 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 // app key (see requireRestaurantAppKey), not the admin frontend's x-client-key, so
 // it must be mounted ahead of the requireClientKey gate below.
 app.use("/api/restaurant", restaurantCentralAuthRoutes);
+app.use("/api/restaurant/darshan/account-deletion", customerDeletionRoutes);
 
 app.use("/api", requireClientKey);
 

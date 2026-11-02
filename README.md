@@ -102,3 +102,9 @@ Both workflows only trigger on changes to their respective package path.
 - Node.js 22.x LTS and npm 10+ for both packages
 - MySQL or MariaDB, and Redis 6.2+ for the backend
 - Java JDK 21 and the Android SDK for building the frontend's Android app
+
+## Pending Work
+
+| Item | Spec |
+|---|---|
+| Customer account deletion (`POST /api/restaurant/darshan/account-deletion/evaluate`, `/anonymise`, and `/revoke-sessions`) — **implemented, not deployed**; needs the migration and a deploy. Anonymised booking/payment history has an 8-year minimum retention configured by `CUSTOMER_DATA_RETENTION_YEARS` | [ACCOUNT_DELETION_PENDING.md](ACCOUNT_DELETION_PENDING.md) |
